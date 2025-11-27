@@ -51,12 +51,6 @@
       word-break: break-all;
     }
   </style>
-
-  <!-- 這行是重點：從 CDN 載入 Blockly（JS 版） -->
-  <script src="https://unpkg.com/blockly/blockly.min.js"></script>
-  <script src="https://unpkg.com/blockly/javascript.min.js"></script>
-  <script src="blocks/api_block.js"></script>
-  <script src="generators/api_block.js"></script>
 </head>
 <body>
   <div id="topBar">
@@ -156,6 +150,17 @@
 
     document.getElementById('runBtn').addEventListener('click', runCode);
   </script>
+
+  <!-- 設定你的 workspace、按鈕邏輯等 -->
+  <!-- 1. Blockly 核心 -->
+  <script src="https://unpkg.com/blockly/blockly.min.js"></script>
+  <!-- 2. JavaScript generator 核心 -->
+  <script src="https://unpkg.com/blockly/javascript.min.js"></script>
+  <!-- 3. 自訂積木定義（外觀） -->
+  <script src="blocks/api_block.js"></script>
+  <!-- 4. 自訂積木 JS 產生器 -->
+  <script src="generators/api_block.js"></script>
+
 </body>
 </html>
 
