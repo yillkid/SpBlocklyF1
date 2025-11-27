@@ -1,5 +1,5 @@
 Blockly.JavaScript['call_api'] = function(block) {
-  var prompt = Blockly.JavaScript.valueToCode(block, 'PROMPT', Blockly.JavaScript.ORDER_ATOMIC) || "''";
+  var text = Blockly.JavaScript.valueToCode(block, 'TEXT', Blockly.JavaScript.ORDER_ATOMIC) || "''";
   var x = Blockly.JavaScript.valueToCode(block, 'X', Blockly.JavaScript.ORDER_ATOMIC) || 0;
   var y = Blockly.JavaScript.valueToCode(block, 'Y', Blockly.JavaScript.ORDER_ATOMIC) || 0;
 
@@ -8,7 +8,7 @@ fetch("https://your-api-endpoint/emotion", {
   method: "POST",
   headers: { "Content-Type": "application/json" },
   body: JSON.stringify({
-    prompt: ${prompt},
+    text: ${text},
     position: [${x}, ${y}]
   })
 })
