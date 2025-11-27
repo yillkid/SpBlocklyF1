@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="utf-8">
+  <title>JS Blockly Editor</title>
+  <style>
+    html, body {
+      height: 100%;
+      margin: 0;
+      overflow: hidden;
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    }
+    #topBar {
+      height: 40px;
+      padding: 4px 8px;
+      background: #2c3e50;
+      color: #ecf0f1;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      box-sizing: border-box;
+    }
+    #runBtn {
+      padding: 4px 10px;
+      border-radius: 4px;
+      border: none;
+      cursor: pointer;
+    }
+    #main {
+      height: calc(100% - 40px);
+      display: flex;
+    }
+    #blocklyArea {
+      flex: 1;
+      position: relative;
+    }
+    #blocklyDiv {
+      position: absolute;
+    }
+    #output {
+      width: 320px;
+      border-left: 1px solid #ccc;
+      font-size: 12px;
+      padding: 4px;
+      box-sizing: border-box;
+      background: #fafafa;
+      overflow: auto;
+    }
+    #output pre {
+      white-space: pre-wrap;
+      word-break: break-all;
+    }
+  </style>
+
+  <!-- 這行是重點：從 CDN 載入 Blockly（JS 版） -->
+  <script src="https://unpkg.com/blockly/blockly.min.js"></script>
+</head>
+<body>
+  <div id="topBar">
+    <div>JS Blockly Editor（之後要串 LLM 的版本）</div>
+    <button id="runBtn">執行程式</button>
+  </div>
+
+  <div id="main">
+    <div id="blocklyArea">
+      <div id="blocklyDiv"></div>
+    </div>
+    <div id="output">
+      <b>輸出：</b>
+      <pre id="log"></pre>
+    </div>
+  </div>
+
+  <!-- 工具箱：先放一些內建積木，之後再加自訂積木 -->
+  <xml id="toolbox" style="display: none">
+    <category name="邏輯" colour="#5C81A6">
+      <block type="controls_if"></block>
+      <block type="logic_compare"></block>
+    </category>
+    <category name="迴圈" colour="#5CA65C">
+      <block type="controls_repeat_ext">
+        <value name="TIMES">
+          <shadow type="math_number">
+            <field name="NUM">5</field>
+          </shadow>
+        </value>
+      </block>
+    </category>
+    <category name="數學" colour="#5C68A6">
+      <block type="math_number"></block>
+    </category>
+    <category name="文字" colour="#5CA68D">
+      <block type="text"></block>
+      <block type="text_print"></block>
+    </category>
+  </xml>
+
+  <script>
+    const blocklyArea = document.getElementById('blocklyArea');
+    const blocklyDiv = document.getElementById('blocklyDiv');
+    const toolbox = document.getElementById('toolbox');
+    const logEl = document.getElementById('log');
+
+    // 建立 workspace
+    const workspace = Blockly.inject(blocklyDiv, {
+      toolbox: toolbox,
+      scrollbars: true
+    });
+
+    // 自適應大小
+    function onresize() {
+      const element = blocklyArea;
+      let x = 0;
+      let y = 0;
+      let el = element;
+      do {
+        x += el.offsetLeft;
+        y += el.offsetTop;
+        el = el.offsetParent;
+      } while (el);
+      blocklyDiv.style.left = x + 'px';
+      blocklyDiv.style.top = y + 'px';
+      blocklyDiv.style.width = element.offsetWidth + 'px';
+      blocklyDiv.style.height = element.offsetHeight + 'px';
+      Blockly.svgResize(workspace);
+    }
+    window.addEventListener('resize', onresize, false);
+    onresize();
+
+    // 覆寫 console.log，讓輸出顯示在右邊面板
+    const originalLog = console.log;
+    console.log = function(...args) {
+      originalLog.apply(console, args);
+      logEl.textContent += args.join(' ') + '\n';
+    };
+
+    // 執行程式：將積木轉成 JS 然後 eval
+    function runCode() {
+      logEl.textContent = '';  // 清空輸出
+      const code = Blockly.JavaScript.workspaceToCode(workspace);
+      console.log('--- 產生的程式碼 ---');
+      console.log(code);
+      console.log('--- 執行結果 ---');
+      try {
+        eval(code);
+      } catch (e) {
+        console.log('錯誤：', e);
+      }
+    }
+
+    document.getElementById('runBtn').addEventListener('click', runCode);
+  </script>
+</body>
+</html>
+
