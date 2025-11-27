@@ -54,6 +54,9 @@
 
   <!-- 這行是重點：從 CDN 載入 Blockly（JS 版） -->
   <script src="https://unpkg.com/blockly/blockly.min.js"></script>
+  <script src="https://unpkg.com/blockly/javascript.min.js"></script>
+  <script src="blocks/api_block.js"></script>
+  <script src="generators/api_block.js"></script>
 </head>
 <body>
   <div id="topBar">
@@ -92,6 +95,9 @@
     <category name="文字" colour="#5CA68D">
       <block type="text"></block>
       <block type="text_print"></block>
+    </category>
+    <category name="自訂積木" colour="#AA00FF">
+      <block type="call_api"></block>
     </category>
   </xml>
 

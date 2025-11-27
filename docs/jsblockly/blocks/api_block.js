@@ -1,0 +1,22 @@
+Blockly.Blocks['call_api'] = {
+  init: function() {
+    this.appendDummyInput()
+        .appendField("呼叫 API");
+    this.appendValueInput("PROMPT")
+        .setCheck("String")
+        .appendField("文字");
+    this.appendValueInput("X")
+        .setCheck("Number")
+        .appendField("位置 X");
+    this.appendValueInput("Y")
+        .setCheck("Number")
+        .appendField("位置 Y");
+
+    this.setPreviousStatement(true, null);
+    this.setNextStatement(true, null);
+
+    this.setColour(230);
+    this.setTooltip("呼叫後端 API 做 LLM 分析");
+  }
+};
+
