@@ -1,161 +1,129 @@
 <!DOCTYPE html>
 <html lang="zh-Hant">
 <head>
-  <meta charset="utf-8">
-  <title>JS Blockly Editor</title>
+  <meta charset="UTF-8" />
+  <title>JS Blockly Editor（之後要串 LLM 的版本）</title>
   <style>
     html, body {
       height: 100%;
       margin: 0;
       overflow: hidden;
-      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      font-family: sans-serif;
     }
     #topBar {
       height: 40px;
-      padding: 4px 8px;
-      background: #2c3e50;
-      color: #ecf0f1;
+      background: #1e88e5;
+      color: white;
       display: flex;
       align-items: center;
+      padding: 0 10px;
       justify-content: space-between;
-      box-sizing: border-box;
-    }
-    #runBtn {
-      padding: 4px 10px;
-      border-radius: 4px;
-      border: none;
-      cursor: pointer;
-    }
-    #main {
-      height: calc(100% - 40px);
-      display: flex;
     }
     #blocklyArea {
-      flex: 1;
+      height: calc(100% - 40px);
+      width: 100%;
       position: relative;
     }
     #blocklyDiv {
       position: absolute;
+      width: 100%;
+      height: 100%;
     }
     #output {
-      width: 320px;
+      position: absolute;
+      right: 0;
+      top: 40px;
+      width: 250px;
+      height: calc(100% - 40px);
+      background: #f4f4f4;
       border-left: 1px solid #ccc;
-      font-size: 12px;
-      padding: 4px;
-      box-sizing: border-box;
-      background: #fafafa;
-      overflow: auto;
-    }
-    #output pre {
+      padding: 10px;
+      overflow-y: auto;
+      font-size: 13px;
       white-space: pre-wrap;
-      word-break: break-all;
     }
   </style>
 </head>
+
 <body>
   <div id="topBar">
-    <div>JS Blockly Editor（之後要串 LLM 的版本）</div>
+    <span>JS Blockly Editor（之後要串 LLM 的版本）</span>
     <button id="runBtn">執行程式</button>
   </div>
 
-  <div id="main">
-    <div id="blocklyArea">
-      <div id="blocklyDiv"></div>
-    </div>
-    <div id="output">
-      <b>輸出：</b>
-      <pre id="log"></pre>
-    </div>
+  <!-- Blockly Workspace -->
+  <div id="blocklyArea">
+    <div id="blocklyDiv"></div>
+    <div id="output"></div>
   </div>
 
-  <!-- 工具箱：先放一些內建積木，之後再加自訂積木 -->
-  <xml id="toolbox" style="display: none">
-    <category name="邏輯" colour="#5C81A6">
-      <block type="controls_if"></block>
-      <block type="logic_compare"></block>
+  <!-- 工具箱 -->
+  <xml id="toolbox" style="display:none">
+    <category name="文字">
+      <block type="text"></block>
     </category>
-    <category name="迴圈" colour="#5CA65C">
-      <block type="controls_repeat_ext">
-        <value name="TIMES">
-          <shadow type="math_number">
-            <field name="NUM">5</field>
-          </shadow>
-        </value>
-      </block>
-    </category>
-    <category name="數學" colour="#5C68A6">
+
+    <category name="數學">
       <block type="math_number"></block>
     </category>
-    <category name="文字" colour="#5CA68D">
-      <block type="text"></block>
-      <block type="text_print"></block>
-    </category>
-    <category name="自訂積木" colour="#AA00FF">
+
+    <category name="自訂積木" colour="#7e57c2">
       <block type="call_api"></block>
     </category>
   </xml>
 
+  <!-- 1. Blockly 核心 -->
+  <script src="https://unpkg.com/blockly/blockly.min.js"></script>
+
+  <!-- 2. JavaScript generator -->
+  <script src="https://unpkg.com/blockly/javascript.min.js"></script>
+
+  <!-- 3. 自訂積木定義（外觀） -->
+  <script src="blocks/api_block.js"></script>
+
+  <!-- 4. 自訂積木產生器（JS runtime） -->
+  <script src="generators/api_block.js"></script>
+
+  <!-- 5. WorkSpace 初始化（務必放最下面） -->
   <script>
-    const blocklyArea = document.getElementById('blocklyArea');
     const blocklyDiv = document.getElementById('blocklyDiv');
     const toolbox = document.getElementById('toolbox');
-    const logEl = document.getElementById('log');
+    const output = document.getElementById('output');
 
-    // 建立 workspace
     const workspace = Blockly.inject(blocklyDiv, {
       toolbox: toolbox,
       scrollbars: true
     });
 
-    // 自適應大小
+    // 設定 Layout
     function onresize() {
-      const element = blocklyArea;
-      let x = 0;
-      let y = 0;
-      let el = element;
-      do {
-        x += el.offsetLeft;
-        y += el.offsetTop;
-        el = el.offsetParent;
-      } while (el);
-      blocklyDiv.style.left = x + 'px';
-      blocklyDiv.style.top = y + 'px';
-      blocklyDiv.style.width = element.offsetWidth + 'px';
-      blocklyDiv.style.height = element.offsetHeight + 'px';
+      blocklyDiv.style.height = (window.innerHeight - 40) + 'px';
       Blockly.svgResize(workspace);
     }
     window.addEventListener('resize', onresize, false);
     onresize();
 
-    // 覆寫 console.log，讓輸出顯示在右邊面板
-    const originalLog = console.log;
-    console.log = function(...args) {
-      originalLog.apply(console, args);
-      logEl.textContent += args.join(' ') + '\n';
+    // 覆寫 console.log → 輸出到右側 Output Pane
+    const originLog = console.log;
+    console.log = function(...msg) {
+      originLog(...msg);
+      output.textContent += msg.join(' ') + '\n';
     };
 
-    // 執行程式：將積木轉成 JS 然後 eval
+    // 執行程式
     function runCode() {
-      logEl.textContent = '';  // 清空輸出
+      output.textContent = "";
       const code = Blockly.JavaScript.workspaceToCode(workspace);
-      console.log('--- 產生的程式碼 ---');
+      console.log("--- 產生的程式碼 ---");
       console.log(code);
-      console.log('--- 執行結果 ---');
+
       try {
         eval(code);
       } catch (e) {
-        console.log('錯誤：', e);
+        console.log("錯誤：", e);
       }
     }
-
     document.getElementById('runBtn').addEventListener('click', runCode);
   </script>
-
-  <!-- 設定你的 workspace、按鈕邏輯等 -->
-<script src="https://unpkg.com/blockly/blockly.min.js"></script>
-<script src="https://unpkg.com/blockly/javascript.min.js"></script>
-<script src="blocks/api_block.js"></script>
-<script src="generators/api_block.js"></script>
 </body>
 </html>
-
