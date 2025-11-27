@@ -1,22 +1,11 @@
-console.log('=== api_block.js 載入成功 ===');
-console.log('Blockly 版本:', Blockly.VERSION);
-console.log('Blockly.JavaScript:', Blockly.JavaScript);
+// Blockly v10+ 使用新的 API
+// 需要使用 javascriptGenerator 而不是 Blockly.JavaScript
+const javascriptGenerator = Blockly.JavaScript || window.Blockly.JavaScript;
 
-// 確保 Blockly.JavaScript 存在
-if (!Blockly.JavaScript) {
-  console.error('Blockly.JavaScript 不存在！');
-}
-
-Blockly.JavaScript['call_api'] = function(block) {
-  console.log('=== call_api generator 被呼叫 ===');
-  console.log('block:', block);
-  console.log('block type:', block.type);
-
-  var text = Blockly.JavaScript.valueToCode(block, 'TEXT', Blockly.JavaScript.ORDER_ATOMIC) || "''";
-  var x = Blockly.JavaScript.valueToCode(block, 'X', Blockly.JavaScript.ORDER_ATOMIC) || '0';
-  var y = Blockly.JavaScript.valueToCode(block, 'Y', Blockly.JavaScript.ORDER_ATOMIC) || '0';
-
-  console.log('text:', text, 'x:', x, 'y:', y);
+javascriptGenerator.forBlock['call_api'] = function(block, generator) {
+  var text = generator.valueToCode(block, 'TEXT', generator.ORDER_ATOMIC) || "''";
+  var x = generator.valueToCode(block, 'X', generator.ORDER_ATOMIC) || '0';
+  var y = generator.valueToCode(block, 'Y', generator.ORDER_ATOMIC) || '0';
 
   var code = 'fetch("https://your-api-endpoint/emotion", {\n' +
     '  method: "POST",\n' +
@@ -31,12 +20,6 @@ Blockly.JavaScript['call_api'] = function(block) {
     '  console.log("API 回傳:", data);\n' +
     '});\n';
 
-  console.log('=== 產生的程式碼 ===');
-  console.log(code);
-
   return code;
 };
-
-console.log('=== call_api generator 註冊完成 ===');
-console.log('已註冊的 generator:', Blockly.JavaScript['call_api']);
 
