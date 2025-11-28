@@ -36,11 +36,11 @@ Blockly.Blocks['get_api_field'] = {
     this.appendDummyInput()
         .appendField("從 API 回應取得")
         .appendField(new Blockly.FieldDropdown([
-          ["LED 列 (row)", "led_position.row"],
-          ["LED 欄 (col)", "led_position.col"],
-          ["顏色 (color)", "color"],
-          ["情緒 (sentiment)", "sentiment"],
-          ["文字 (text)", "text"]
+          ["LED 列", "led_position.row"],
+          ["LED 欄", "led_position.col"],
+          ["顏色", "color"],
+          ["情緒", "sentiment"],
+          ["文字", "text"]
         ]), "FIELD");
     this.setOutput(true, null);
     this.setColour(230);

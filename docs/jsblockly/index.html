@@ -99,16 +99,19 @@
   <!-- 1. Blockly 核心 -->
   <script src="https://unpkg.com/blockly/blockly.min.js"></script>
 
-  <!-- 2. JavaScript generator -->
+  <!-- 2. Blockly 中文語言包 -->
+  <script src="https://unpkg.com/blockly/msg/zh-hant.js"></script>
+
+  <!-- 3. JavaScript generator -->
   <script src="https://unpkg.com/blockly/javascript.min.js"></script>
 
-  <!-- 3. 自訂積木定義（外觀） -->
+  <!-- 4. 自訂積木定義（外觀） -->
   <script src="blocks/api_block.js"></script>
 
-  <!-- 4. 自訂積木產生器（JS runtime） -->
+  <!-- 5. 自訂積木產生器（JS runtime） -->
   <script src="generators/api_block.js"></script>
 
-  <!-- 5. WorkSpace 初始化（務必放最下面） -->
+  <!-- 6. WorkSpace 初始化（務必放最下面） -->
   <script>
     const blocklyDiv = document.getElementById('blocklyDiv');
     const toolbox = document.getElementById('toolbox');
